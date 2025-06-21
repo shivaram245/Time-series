@@ -33,7 +33,7 @@ try:
     # Step 7: Plot
     st.subheader("📊 Tata Close Over Time")
     fig, ax = plt.subplots()
-    ax.plot(df["Date"], df["Tata_Close"], color='blue')
+    ax.plot(df["Date"], df["Tata Close"], color='blue')
     ax.set_xlabel("Date")
     ax.set_ylabel("Tata Close")
     st.pyplot(fig)
