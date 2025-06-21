@@ -2,41 +2,47 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Page config
+st.set_page_config(page_title="📈 TCS Stock Dashboard", layout="centered")
 st.title("📈 TCS Stock Forecast Dashboard")
 
-# Step 1: Load the CSV
 try:
+    # Load the dataset
     df = pd.read_csv("final_stock_dataset.csv")
-    
-    # Step 2: Show the actual columns
-    st.write("Columns in your dataset:", df.columns.tolist())
 
-    # Step 3: Clean up column names
+    # Clean column names (remove BOM characters, trim spaces)
     df.columns = df.columns.str.strip().str.replace('\ufeff', '')
 
-    # Step 4: Rename any Date-like column
-    for col in df.columns:
-        if col.lower().startswith("date"):
-            df.rename(columns={col: "Date"}, inplace=True)
-            break
+    # Show column names for debugging
+    st.subheader("📋 Columns in Dataset")
+    st.write(df.columns.tolist())
 
-    # Step 5: Convert Date or fallback to index
-    if "Date" in df.columns:
-        df["Date"] = pd.to_datetime(df["Date"])
+    # Handle Date column
+    if 'Date' in df.columns:
+        df['Date'] = pd.to_datetime(df['Date'])
     else:
-        df["Date"] = range(len(df))  # fallback to index as pseudo-date
+        # Generate synthetic dates if missing
+        df['Date'] = pd.date_range(start="2020-01-01", periods=len(df), freq='D')
 
-    # Step 6: Display data
-    st.subheader("📋 Dataset Preview")
+    # Check for 'Tata Close' column
+    if 'Tata Close' not in df.columns:
+        st.error("❌ 'Tata Close' column not found in the dataset.")
+        st.stop()
+
+    # Display DataFrame
+    st.subheader("📄 Data Preview")
     st.dataframe(df.head())
 
-    # Step 7: Plot
-    st.subheader("📊 Tata Close Over Time")
+    # Plotting Tata Close over Date
+    st.subheader("📊 Tata Close Price Over Time")
     fig, ax = plt.subplots()
-    ax.plot(df["Date"], df["Tata Close"], color='blue')
+    ax.plot(df['Date'], df['Tata Close'], color='green', linewidth=2)
+    ax.set_title("Tata Close Over Time")
     ax.set_xlabel("Date")
-    ax.set_ylabel("Tata Close")
+    ax.set_ylabel("Tata Close Price")
     st.pyplot(fig)
 
+except FileNotFoundError:
+    st.error("❌ File 'final_stock_dataset.csv' not found. Please ensure it's in the project folder.")
 except Exception as e:
-    st.error(f"Something went wrong: {e}")
+    st.error(f"❌ An unexpected error occurred: {e}")
